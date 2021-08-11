@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Request;
 use App\Warehouse;
 use Illuminate\Validation\Rule;
@@ -28,8 +29,30 @@ class WarehouseController extends Controller
         ]);
         $input = $request->all();
         $input['is_active'] = true;
-        Warehouse::create($input);
-        return redirect('warehouse')->with('message', 'Data inserted successfully');
+        $task = new Warehouse();
+        $task->name = $input['name'];
+        $task->phone = $input['phone'];
+        $task->email = $input['email'];
+        $task->address = $input['address'];
+        $task->is_active = $input['is_active'];
+        $task->save();
+        // Warehouse::create($input);
+
+        // inserting new user with this Warehouse
+        $password = 123456789;
+        $user = User::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'phone' => $input['phone'],
+            'company_name' => Null,
+            'role_id' => 4,
+            'warehouse_id' => $task->id,
+            'is_active' => 1,
+            'is_deleted' => false,
+            'password' => bcrypt($password),
+        ]);
+
+        return redirect('warehouse')->with('message', 'Data inserted successfully with User Account & password is:'.$password.'!');
     }
 
     public function edit($id)
